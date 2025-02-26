@@ -1,0 +1,37 @@
+server:
+  port: 8085
+
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials:
+              - true
+      routes:
+        - id: fos-auth
+          uri: http://localhost:9000
+          predicates:
+            - Path=/api/auth/**
+            - Path=/oauth2/token
+            - Path=/login
+          filters:
+            - RewritePath=/api/auth/(?<segment>.*), /api/{segment}
+
+        - id: fos-core
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/core/**
+          filters:
+            - RewritePath=/api/core/(?<segment>.*), /api/{segment}
