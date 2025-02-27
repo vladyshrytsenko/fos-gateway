@@ -1,37 +1,34 @@
 server:
   port: 8085
+  forward-headers-strategy: framework
 
 spring:
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lowerCaseServiceId: true
       globalcors:
-        corsConfigurations:
+        cors-configurations:
           '[/**]':
-            allowedOrigins:
-              - "http://localhost:4200"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders:
-              - "*"
-            allowCredentials:
-              - true
+            allowed-origins: "http://localhost:4200"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            allow-credentials: true
       routes:
         - id: fos-auth
           uri: http://localhost:9000
           predicates:
-            - Path=/api/auth/**
-            - Path=/oauth2/token
-            - Path=/login
+            - Path=/api/auth/**, /oauth2/token, /login
           filters:
-            - RewritePath=/api/auth/(?<segment>.*), /api/{segment}
+            - RewritePath=/api/auth/?(?<segment>.*), /api/$\{segment}
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
 
         - id: fos-core
           uri: http://localhost:8080
           predicates:
             - Path=/api/core/**
           filters:
-            - RewritePath=/api/core/(?<segment>.*), /api/{segment}
+            - RewritePath=/api/core/?(?<segment>.*), /api/$\{segment}
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
