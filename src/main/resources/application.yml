@@ -12,13 +12,13 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowed-origins: "http://localhost:4200"
+            allowed-origins: ${GATEWAY_GLOBALCORS_CORS_CONFIGURATIONS_[/**]_ALLOWED_ORIGINS}
             allowed-methods: "*"
             allowed-headers: "*"
             allow-credentials: true
       routes:
         - id: fos-auth
-          uri: http://localhost:9000
+          uri: ${GATEWAY_ROUTES_FOS_AUTH_URI}
           predicates:
             - Path=/api/auth/**, /oauth2/token, /login
           filters:
@@ -26,7 +26,7 @@ spring:
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
 
         - id: fos-core
-          uri: http://localhost:8080
+          uri: ${GATEWAY_ROUTES_FOS_CORE_URI}
           predicates:
             - Path=/api/core/**
           filters:
