@@ -38,7 +38,7 @@ services:
       # Google
       CLIENT_REGISTRATION_GOOGLE_CLIENT_ID: google-client-id
       CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET: google-client-secret
-      CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI: http://localhost:8085/login/oauth2/code/google
+      CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI: http://gateway:8085/login/oauth2/code/google
 
       #Github
       CLIENT_REGISTRATION_GITHUB_CLIENT_ID: github-client-id
