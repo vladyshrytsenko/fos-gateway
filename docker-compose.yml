@@ -9,8 +9,8 @@ services:
       - "8085:8085"
     environment:
       GATEWAY_GLOBALCORS_CORS_CONFIGURATIONS_[/**]_ALLOWED_ORIGINS: "http://localhost:4200"
-      GATEWAY_ROUTES_FOS_AUTH_URI: "http://host.docker.internal:9000"
-      GATEWAY_ROUTES_FOS_CORE_URI: "http://host.docker.internal:8080"
+      GATEWAY_ROUTES_FOS_AUTH_URI: "http://auth:9000"
+      GATEWAY_ROUTES_FOS_CORE_URI: "http://core:8080"
     restart: always
     networks:
       - fos-network
@@ -33,19 +33,22 @@ services:
       CLIENT_OIDC_CLIENT_REGISTRATION_CLIENT_SECRET: secret
       CLIENT_OIDC_CLIENT_REGISTRATION_REDIRECT_URIS: http://localhost:4200/auth-callback
       CLIENT_OIDC_CLIENT_REGISTRATION_POST_LOGOUT_REDIRECT_URIS: http://localhost:4200/login
-      CLIENT_OIDC_CLIENT_JWT_SET_URI: http://host.docker.internal:9000/oauth2/jwks
+      CLIENT_OIDC_CLIENT_JWT_SET_URI: http://gateway:8085/oauth2/jwks
 
       # Google
       CLIENT_REGISTRATION_GOOGLE_CLIENT_ID: google-client-id
       CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET: google-client-secret
-      CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI: http://localhost:9000/login/oauth2/code/google
+      CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI: http://localhost:8085/login/oauth2/code/google
 
       #Github
       CLIENT_REGISTRATION_GITHUB_CLIENT_ID: github-client-id
       CLIENT_REGISTRATION_GITHUB_CLIENT_SECRET: github-client-secret
-      CLIENT_REGISTRATION_GITHUB_REDIRECT_URI: http://localhost:9000/login/oauth2/code/github
+      CLIENT_REGISTRATION_GITHUB_REDIRECT_URI: http://gateway:8085/login/oauth2/code/github
 
-      CORS_ALLOWED_ORIGINS: http://localhost:8080, http://localhost:4200
+      JWT_ISSUER-URI: http://gateway:8085
+      CORS_ALLOWED_ORIGINS: http://localhost:4200, http://localhost:8085
+    expose:
+      - "9000"
     depends_on:
       - postgres-auth
     networks:
@@ -71,10 +74,14 @@ services:
       STRIPE_API_KEY: pk_test_51QEqbRLpw8bYPSLySTjaEWbMfx1YsX30zlK3bprzDi8QAMM4CpqvZq9npLF1KviVmaUY82wicPNqHhX2F4s3VTdz00Acy35Wcx
       STRIPE_API_SECRET_KEY: sk_test_51QEqbRLpw8bYPSLy6e8b7q636ScJIPrQaqnMbduJiihJLlO0CBBVcJqzv9F7Yi3k5bOMGYFRH2ypB7VlvRESmctD00FIoFCKuN
 
-      CLIENT_OIDC_CLIENT_JWT_SET_URI: http://host.docker.internal:9000/oauth2/jwks
+      CLIENT_OIDC_CLIENT_JWT_SET_URI: http://gateway:8085/oauth2/jwks
+
+      JWT_ISSUER-URI: http://gateway:8085
 
       CORS_ALLOWED_ORIGINS: http://localhost:4200
-      FEIGN_AUTH_SERVICE_URL: http://localhost:9000
+      FEIGN_AUTH_SERVICE_URL: http://auth:9000
+    expose:
+      - "8080"
     depends_on:
       - postgres-core
       - rabbitmq
