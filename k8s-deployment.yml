@@ -236,8 +236,9 @@ spec:
     app: postgres-auth
   ports:
     - protocol: TCP
-      port: 5432
-      targetPort: 5432
+      port: 5433
+      targetPort: 5433
+  type: ClusterIP
 
 ---
 
@@ -290,6 +291,7 @@ spec:
     - protocol: TCP
       port: 5432
       targetPort: 5432
+  type: ClusterIP
 
 ---
 
