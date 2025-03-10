@@ -22,12 +22,9 @@ spec:
     spec:
       containers:
         - name: gateway
-          image: fos-gateway-image
+          image: umelon/fos-gateway-image
           ports:
             - containerPort: 8085
-          envFrom:
-            - configMapRef:
-                name: fos-config
           env:
             - name: GATEWAY_GLOBALCORS_CORS_CONFIGURATIONS_[/**]_ALLOWED_ORIGINS
               value: http://localhost:4200
@@ -71,10 +68,36 @@ spec:
     spec:
       containers:
         - name: auth
-          image: fos-auth-image
+          image: umelon/fos-auth-image
           ports:
             - containerPort: 9000
           env:
+            - name: CLIENT_OIDC_CLIENT_REGISTRATION_CLIENT_ID
+              value: client
+            - name: CLIENT_OIDC_CLIENT_REGISTRATION_CLIENT_SECRET
+              value: secret
+            - name: CLIENT_OIDC_CLIENT_REGISTRATION_REDIRECT_URIS
+              value: http://localhost:4200/auth-callback
+            - name: CLIENT_OIDC_CLIENT_REGISTRATION_POST_LOGOUT_REDIRECT_URIS
+              value: http://localhost:4200/login
+            - name: CLIENT_OIDC_CLIENT_JWT_SET_URI
+              value: http://gateway:8085/oauth2/jwks
+            - name: CLIENT_REGISTRATION_GOOGLE_CLIENT_ID
+              value: google-client-id
+            - name: CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET
+              value: google-client-secret
+            - name: CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI
+              value: http://gateway:8085/login/oauth2/code/google
+            - name: CLIENT_REGISTRATION_GITHUB_CLIENT_ID
+              value: github-client-id
+            - name: CLIENT_REGISTRATION_GITHUB_CLIENT_SECRET
+              value: github-client-secret
+            - name: CLIENT_REGISTRATION_GITHUB_REDIRECT_URI
+              value: http://gateway:8085/login/oauth2/code/github
+            - name: JWT_ISSUER-URI
+              value: http://gateway:8085
+            - name: CORS_ALLOWED_ORIGINS
+              value: http://localhost:4200, http://localhost:8085
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://postgres-auth:5432/fos-auth-db
             - name: SPRING_DATASOURCE_USERNAME
@@ -116,16 +139,38 @@ spec:
     spec:
       containers:
         - name: core
-          image: fos-core-image
+          image: umelon/fos-core-image
           ports:
             - containerPort: 8080
           env:
             - name: SPRING_DATASOURCE_URL
-              value: ${CORE_DATASOURCE_URL}
+              value: jdbc:postgresql://postgres-core:5432/fos-core-db
             - name: SPRING_DATASOURCE_USERNAME
-              value: ${CORE_DATASOURCE_USERNAME}
+              value: postgres
             - name: SPRING_DATASOURCE_PASSWORD
-              value: ${CORE_DATASOURCE_PASSWORD}
+              value: password
+            - name: SPRING_RABBITMQ_HOST
+              value: rabbitmq
+            - name: SPRING_RABBITMQ_VIRTUAL_HOST
+              value: vhost
+            - name: SPRING_RABBITMQ_USERNAME
+              value: rab
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: "1234"
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+            - name: STRIPE_API_KEY
+              value: pk_test_51QEqbRLpw8bYPSLySTjaEWbMfx1YsX30zlK3bprzDi8QAMM4CpqvZq9npLF1KviVmaUY82wicPNqHhX2F4s3VTdz00Acy35Wcx
+            - name: STRIPE_API_SECRET_KEY
+              value: sk_test_51QEqbRLpw8bYPSLy6e8b7q636ScJIPrQaqnMbduJiihJLlO0CBBVcJqzv9F7Yi3k5bOMGYFRH2ypB7VlvRESmctD00FIoFCKuN
+            - name: CLIENT_OIDC_CLIENT_JWT_SET_URI
+              value: http://gateway:8085/oauth2/jwks
+            - name: JWT_ISSUER-URI
+              value: http://gateway:8085
+            - name: CORS_ALLOWED_ORIGINS
+              value: http://localhost:4200
+            - name: FEIGN_AUTH_SERVICE_URL
+              value: http://auth:9000
 
 ---
 
@@ -218,9 +263,9 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_USER
-              value: ${CORE_DATASOURCE_USERNAME}
+              value: postgres
             - name: POSTGRES_PASSWORD
-              value: ${CORE_DATASOURCE_PASSWORD}
+              value: password
             - name: POSTGRES_DB
               value: fos-core-db
           volumeMounts:
