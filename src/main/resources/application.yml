@@ -20,7 +20,7 @@ spring:
         - id: fos-auth
           uri: ${GATEWAY_ROUTES_FOS_AUTH_URI}
           predicates:
-            - Path=/api/auth/**, /oauth2/**, /login
+            - Path=/api/auth/**, /oauth2/**, /login, /logout
           filters:
             - RewritePath=/api/auth/?(?<segment>.*), /api/$\{segment}
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
