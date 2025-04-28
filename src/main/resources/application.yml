@@ -20,7 +20,7 @@ spring:
         - id: fos-auth
           uri: ${GATEWAY_ROUTES_FOS_AUTH_URI}
           predicates:
-            - Path=/api/auth/**, /oauth2/**, /login, /logout
+            - Path=/api/auth/**, /oauth2/**, /login, /logout, /login/oauth/**
           filters:
             - RewritePath=/api/auth/?(?<segment>.*), /api/$\{segment}
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
@@ -31,4 +31,12 @@ spring:
             - Path=/api/core/**
           filters:
             - RewritePath=/api/core/?(?<segment>.*), /api/$\{segment}
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+
+        - id: fos-support
+          uri: ${GATEWAY_ROUTES_FOS_SUPPORT_URI}
+          predicates:
+            - Path=/api/support/**
+          filters:
+            - RewritePath=/api/support/?(?<segment>.*), /api/$\{segment}
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
