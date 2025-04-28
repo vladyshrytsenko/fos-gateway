@@ -8,15 +8,17 @@ services:
     ports:
       - "8085:8085"
     environment:
-      GATEWAY_GLOBALCORS_CORS_CONFIGURATIONS_[/**]_ALLOWED_ORIGINS: "http://localhost:4200"
+      GATEWAY_GLOBALCORS_CORS_CONFIGURATIONS_[/**]_ALLOWED_ORIGINS: "http://localhost:3000"
       GATEWAY_ROUTES_FOS_AUTH_URI: "http://auth:9000"
       GATEWAY_ROUTES_FOS_CORE_URI: "http://core:8080"
+      GATEWAY_ROUTES_FOS_SUPPORT_URI: "http://support:8095"
     restart: always
     networks:
       - fos-network
     depends_on:
       - auth
       - core
+      - support
 
   auth:
     build:
@@ -31,13 +33,16 @@ services:
       # Authorization Server configuration
       CLIENT_OIDC_CLIENT_REGISTRATION_CLIENT_ID: client
       CLIENT_OIDC_CLIENT_REGISTRATION_CLIENT_SECRET: secret
-      CLIENT_OIDC_CLIENT_REGISTRATION_REDIRECT_URIS: http://localhost:4200/auth-callback
-      CLIENT_OIDC_CLIENT_REGISTRATION_POST_LOGOUT_REDIRECT_URIS: http://localhost:4200/login
+      CLIENT_OIDC_CLIENT_REGISTRATION_REDIRECT_URIS: http://localhost:3000/auth-callback
+      #      CLIENT_OIDC_CLIENT_REGISTRATION_REDIRECT_URIS: http://localhost:4200/auth-callback
+      #      CLIENT_OIDC_CLIENT_REGISTRATION_REDIRECT_URIS: http://localhost:8090/auth-callback
+      CLIENT_OIDC_CLIENT_REGISTRATION_POST_LOGOUT_REDIRECT_URIS: http://localhost:3000/login
+#      CLIENT_OIDC_CLIENT_REGISTRATION_POST_LOGOUT_REDIRECT_URIS: http://localhost:4200/login
       CLIENT_OIDC_CLIENT_JWT_SET_URI: http://gateway:8085/oauth2/jwks
 
       # Google
-      CLIENT_REGISTRATION_GOOGLE_CLIENT_ID: google-client-id
-      CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET: google-client-secret
+      CLIENT_REGISTRATION_GOOGLE_CLIENT_ID: 653875561290-jtd5p8sda5ulj7ul6s2dofkmq7k1neht.apps.googleusercontent.com
+      CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET: 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
       CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI: http://gateway:8085/login/oauth2/code/google
 
       #Github
@@ -46,7 +51,7 @@ services:
       CLIENT_REGISTRATION_GITHUB_REDIRECT_URI: http://gateway:8085/login/oauth2/code/github
 
       JWT_ISSUER-URI: http://gateway:8085
-      CORS_ALLOWED_ORIGINS: http://localhost:4200, http://localhost:8085
+      CORS_ALLOWED_ORIGINS: http://localhost:4200, http://localhost:8085, http://localhost:3000
     expose:
       - "9000"
     depends_on:
@@ -78,13 +83,37 @@ services:
 
       JWT_ISSUER-URI: http://gateway:8085
 
-      CORS_ALLOWED_ORIGINS: http://localhost:4200
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+#      CORS_ALLOWED_ORIGINS: http://localhost:4200
       FEIGN_AUTH_SERVICE_URL: http://auth:9000
     expose:
       - "8080"
     depends_on:
       - postgres-core
       - rabbitmq
+    networks:
+      - fos-network
+    restart: on-failure
+
+  support:
+    build:
+      context: ../fos-support
+    image: fos-support-image
+    container_name: fos-support
+    environment:
+      SPRING_DATA_MONGODB_DATABASE: fos-support-db
+      SPRING_DATA_MONGODB_USERNAME: user-mongo
+      SPRING_DATA_MONGODB_PASSWORD: password-mongo
+
+      CLIENT_OIDC_CLIENT_JWT_SET_URI: http://gateway:8085/oauth2/jwks
+
+      JWT_ISSUER-URI: http://gateway:8085
+
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+    expose:
+      - "8095"
+    depends_on:
+      - mongo
     networks:
       - fos-network
     restart: on-failure
@@ -100,6 +129,7 @@ services:
       - postgres-auth-data:/var/lib/postgresql/data
     networks:
       - fos-network
+    restart: on-failure
 
   postgres-core:
     image: postgres:15
@@ -112,6 +142,20 @@ services:
       - postgres-core-data:/var/lib/postgresql/data
     networks:
       - fos-network
+    restart: on-failure
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user-mongo
+      MONGO_INITDB_ROOT_PASSWORD: password-mongo
+      MONGO_INITDB_DATABASE: fos-support-db
+    volumes:
+      - mongo-data:/var/lib/mongo/data
+    networks:
+      - fos-network
+    restart: on-failure
 
   rabbitmq:
     image: rabbitmq:latest
@@ -133,6 +177,7 @@ volumes:
   rabbitmq:
   postgres-auth-data:
   postgres-core-data:
+  mongo-data:
 
 networks:
   fos-network:
