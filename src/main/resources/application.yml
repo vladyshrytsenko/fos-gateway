@@ -36,7 +36,7 @@ spring:
         - id: fos-support
           uri: ${GATEWAY_ROUTES_FOS_SUPPORT_URI}
           predicates:
-            - Path=/api/support/**
+            - Path=/api/support/**, /ws/**
           filters:
             - RewritePath=/api/support/?(?<segment>.*), /api/$\{segment}
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE

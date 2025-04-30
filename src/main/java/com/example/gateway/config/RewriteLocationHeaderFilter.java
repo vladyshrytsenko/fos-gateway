@@ -23,7 +23,8 @@ public class RewriteLocationHeaderFilter {
 
                     String newLocation = locations.getFirst()
                         .replace("http://auth:9000", "http://localhost:8085")
-                        .replace("http://core:8080", "http://localhost:8085");
+                        .replace("http://core:8080", "http://localhost:8085")
+                        .replace("http://support:8095", "http://localhost:8085");
 
                     response.getHeaders().set(HttpHeaders.LOCATION, newLocation);
                 }
