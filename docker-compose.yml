@@ -169,7 +169,7 @@ services:
       RABBITMQ_DEFAULT_USER_TAGS: administrator
       RABBITMQ_DEFAULT_PERMISSIONS: ".* .* .*"
     volumes:
-      - rabbitmq:/var/lib/rabbitmq￼
+      - rabbitmq:/var/lib/rabbitmq
     networks:
       - fos-network
 
